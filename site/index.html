@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CLEC 双典 · 简介与大纲</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="mark">CLEC 双典</span>
+        <span class="sub">理财圣经 · CLEC 宝典</span>
+      </div>
+      <nav class="tabs">
+        <button
+          v-for="b in books"
+          :key="b.id"
+          class="tab"
+          :class="{ on: activeId === b.id }"
+          @click="selectBook(b.id)"
+        >{{ b.title }}</button>
+      </nav>
+    </header>
+
+    <main class="wrap">
+      <!-- HERO -->
+      <section class="hero reveal">
+        <div class="kicker">{{ active.kind }}</div>
+        <h1>{{ active.title }}</h1>
+        <div class="sub">{{ active.subtitle }}</div>
+        <div class="tagline">「 {{ active.tagline }} 」</div>
+        <div class="shape">{{ active.author }}</div>
+        <div class="meta">
+          <span class="chip"><b>版本</b>　{{ active.version }}</span>
+          <span class="chip"><b>页数</b>　{{ active.pages }} 页</span>
+          <span class="chip"><b>结构</b>　{{ active.shape }}</span>
+        </div>
+      </section>
+
+      <!-- 简介 -->
+      <section class="section reveal">
+        <div class="section-head">
+          <span class="idx">壹</span>
+          <h2>简介</h2>
+          <span class="line"></span>
+        </div>
+        <div class="intro">
+          <p v-for="(p, i) in active.intro" :key="i">{{ p }}</p>
+        </div>
+      </section>
+
+      <!-- 大纲 -->
+      <section class="section reveal">
+        <div class="section-head">
+          <span class="idx">贰</span>
+          <h2>大纲</h2>
+          <span class="line"></span>
+        </div>
+
+        <!-- 理财圣经：铁律分隔的平铺列表 -->
+        <div v-if="active.id === 'shengjing'" class="outline-list">
+          <template v-for="(it, i) in active.outline" :key="i">
+            <div v-if="it.t === 'rule'" class="rule">
+              <span class="dot"></span><span class="rtxt">{{ it.title }}</span>
+            </div>
+            <div v-else class="row" :class="it.t">
+              <span class="num" v-if="it.n">{{ it.n }}</span>
+              <span class="num" v-else>※</span>
+              <span class="ttl">{{ it.title }}</span>
+            </div>
+          </template>
+        </div>
+
+        <!-- CLEC宝典：六篇手风琴 -->
+        <div v-else class="acc">
+          <div v-for="(part, pi) in active.outline" :key="pi" class="part">
+            <template v-if="part.t === 'part'">
+              <div class="part-head" @click="togglePart(pi)">
+                <div class="pt">
+                  <span class="pn">PART {{ pi + 1 }}</span>
+                  <span class="ptitle">{{ part.title }}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:14px">
+                  <span class="cnt">{{ part.chapters.length }} 章</span>
+                  <span class="chev" :class="{ open: openParts[pi] }">▶</span>
+                </div>
+              </div>
+              <div class="chapters" v-show="openParts[pi]">
+                <div class="chapter" v-for="c in part.chapters" :key="c.n">
+                  <span class="cn">{{ c.n }}</span><span class="ct">{{ c.title }}</span>
+                </div>
+              </div>
+            </template>
+
+            <template v-else-if="part.t === 'closing'">
+              <div class="closing">
+                <div class="ctitle">{{ part.title }}</div>
+                <ul>
+                  <li v-for="(it, k) in part.items" :key="k">{{ it }}</li>
+                </ul>
+              </div>
+            </template>
+          </div>
+        </div>
+      </section>
+
+      <footer class="foot">
+        本页内容由目录下两本 PDF 自动提取目录与正文整理而成 · 数据截止本书标注版本 · 仅供阅读参考
+      </footer>
+    </main>
+  </div>
+
+  <script src="assets/vue.global.prod.js"></script>
+  <script src="assets/app.js"></script>
+  <script>
+    // 默认展开宝典第一篇，并启用滚动渐显
+    (function () {
+      const app = document.getElementById('app');
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, { threshold: 0.12 });
+      document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+    })();
+  </script>
+</body>
+</html>
